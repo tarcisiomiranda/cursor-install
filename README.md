@@ -5,6 +5,6 @@
 
 ## Installation
     git clone git@github.com:sonndc/Cursor-AI-install.git
-    cd cursor-ai-install
+    cd Cursor-AI-install
     chmod +x install.sh
     sh install.sh
