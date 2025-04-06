@@ -45,9 +45,21 @@ removeCursor() {
   fi
 }
 
+reloadDesktopDatabase() {
+  DESKTOP_DIR="$HOME/.local/share/applications"
+  echo "Reloading desktop file database for $DESKTOP_DIR ..."
+  update-desktop-database "$DESKTOP_DIR"
+  if [ $? -eq 0 ]; then
+    echo "Desktop file database reloaded successfully."
+  else
+    echo "Failed to reload desktop file database."
+  fi
+}
+
 echo "Choose an option:"
 echo "1) Install/Update Cursor AI IDE"
 echo "2) Remove current installation"
+echo "3) Reload desktop file database"
 read -rp "Option: " option
 
 case $option in
@@ -56,6 +68,9 @@ case $option in
     ;;
   2)
     removeCursor
+    ;;
+  3)
+    reloadDesktopDatabase
     ;;
   *)
     echo "Invalid option."
