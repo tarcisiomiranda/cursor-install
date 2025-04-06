@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-from PyInquirer import prompt
+import questionary
+# from collections.abc import Mapping
+
 
 def encontrar_arquivos_desktop():
     """
@@ -45,20 +47,13 @@ def buscar_por_nome(arquivos):
         print("Não há arquivos para buscar.")
         return
     
-    pergunta_busca = [
-        {
-            'type': 'input',
-            'name': 'termo',
-            'message': 'Digite o termo para pesquisa (ou deixe vazio para cancelar):'
-        }
-    ]
-    resposta = prompt(pergunta_busca)
-    termo = resposta.get('termo', '').strip().lower()
-
+    termo = questionary.text('Digite o termo para pesquisa (ou deixe vazio para cancelar):').ask()
+    
     if not termo:
         print("Busca cancelada.")
         return
     
+    termo = termo.strip().lower()
     resultados = [a for a in arquivos if termo in os.path.basename(a).lower()]
     
     if resultados:
@@ -74,33 +69,21 @@ def deletar_arquivo(arquivos):
         print("\nNão há arquivos .desktop para deletar.")
         return
     
-    # Preparar choices para o PyInquirer
-    choices = [{'name': arq} for arq in arquivos]
+    arquivo_escolhido = questionary.select(
+        'Selecione o arquivo que deseja excluir:',
+        choices=arquivos
+    ).ask()
     
-    # Pergunta para escolher qual arquivo deletar
-    pergunta_deletar = [
-        {
-            'type': 'list',
-            'name': 'arquivo_escolhido',
-            'message': 'Selecione o arquivo que deseja excluir:',
-            'choices': choices
-        }
-    ]
-    resposta = prompt(pergunta_deletar)
-    arquivo_escolhido = resposta['arquivo_escolhido']
+    if not arquivo_escolhido:
+        print("Nenhum arquivo selecionado.")
+        return
     
-    # Confirmação
-    pergunta_confirmacao = [
-        {
-            'type': 'confirm',
-            'name': 'confirmar',
-            'message': f"Tem certeza de que deseja excluir '{arquivo_escolhido}'?",
-            'default': False
-        }
-    ]
-    confirmacao = prompt(pergunta_confirmacao)
+    confirmar = questionary.confirm(
+        f"Tem certeza de que deseja excluir '{arquivo_escolhido}'?",
+        default=False
+    ).ask()
     
-    if confirmacao.get('confirmar'):
+    if confirmar:
         try:
             os.remove(arquivo_escolhido)
             print(f"Arquivo '{arquivo_escolhido}' excluído com sucesso.")
@@ -113,26 +96,20 @@ def deletar_arquivo(arquivos):
 
 def menu_principal():
     """
-    Exibe um menu interativo com PyInquirer.
+    Exibe um menu interativo com questionary.
     """
     while True:
         arquivos = encontrar_arquivos_desktop()
         
-        perguntas_menu = [
-            {
-                'type': 'list',
-                'name': 'acao',
-                'message': 'O que deseja fazer?',
-                'choices': [
-                    'Listar arquivos .desktop',
-                    'Buscar por nome',
-                    'Deletar um arquivo .desktop',
-                    'Sair'
-                ]
-            }
-        ]
-        resposta_menu = prompt(perguntas_menu)
-        acao = resposta_menu.get('acao')
+        acao = questionary.select(
+            'O que deseja fazer?',
+            choices=[
+                'Listar arquivos .desktop',
+                'Buscar por nome',
+                'Deletar um arquivo .desktop',
+                'Sair'
+            ]
+        ).ask()
         
         if acao == 'Listar arquivos .desktop':
             listar_arquivos(arquivos)
